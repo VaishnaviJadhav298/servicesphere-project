@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import React from "react";
 
-export default function Navbar() {
+interface NavbarProps {
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function Navbar({ setOpen }: NavbarProps) {
 
   return (
 
@@ -43,6 +48,13 @@ export default function Navbar() {
 
       {/* Buttons */}
       <div className="flex gap-5">
+
+        <button
+          onClick={() => setOpen(true)}
+          className="border border-white/30 bg-white/5 backdrop-blur-sm hover:bg-white hover:text-black px-8 py-3 rounded-xl text-lg font-medium transition duration-300"
+        >
+          Open
+        </button>
 
         {/* Sign In */}
         <Link href="/signin">
