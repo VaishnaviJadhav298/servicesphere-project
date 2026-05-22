@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# backend
+backend/target/
+backend/uploads/
+
+# intellij
+.idea/
+
+# frontend extra
+servicesphere-frontend/node_modules/
+servicesphere-frontend/.next/
