@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import API from "@/services/api";
+import axios from "axios";
 
 export default function SignUpPage() {
 
@@ -49,46 +49,71 @@ export default function SignUpPage() {
 
       setLoading(true);
 
-      const response =
-        await API.post(
-          "/auth/signup",
-          {
-            fullName,
-            email,
-            password,
-            mobileNumber,
-            address,
-          }
-        );
-
-      console.log(response.data);
-
-      alert("Signup Successful");
-
-      // SAVE USER
-      localStorage.setItem(
-        "user",
-        JSON.stringify(response.data)
-      );
-
-      // CUSTOMER
+      // CUSTOMER SIGNUP
       if (
         selectedRole === "customer"
       ) {
 
-        router.push(
-          "/customer/dashboard"
+        alert(
+          "Customer signup backend not connected yet"
         );
+
       }
 
-      // PROVIDER
+      // VENDOR SIGNUP
       else if (
         selectedRole === "provider"
       ) {
 
-        router.push(
-          "/vendor/complete-profile"
+        const payload = {
+
+          name: fullName,
+
+          email: email,
+
+          phone: mobileNumber,
+
+          address: address,
+
+          password: password,
+
+          availableTime: "",
+
+          serviceName: "",
+
+          experience: "",
+
+        };
+
+        const response =
+          await axios.post(
+
+            "http://localhost:8080/auth/vendor/register",
+
+            payload
+
+          );
+
+        console.log(response.data);
+
+        alert("Vendor Signup Successful");
+
+        // SAVE EMAIL
+        localStorage.setItem(
+          "vendorEmail",
+          email
         );
+
+        // SAVE VENDOR
+        localStorage.setItem(
+          "vendor",
+          JSON.stringify(response.data)
+        );
+
+        router.push(
+          "/vendor"
+        );
+
       }
 
     } catch (error) {
@@ -96,12 +121,15 @@ export default function SignUpPage() {
       console.error(error);
 
       alert("Signup Failed");
+
     }
 
     finally {
 
       setLoading(false);
+
     }
+
   };
 
   return (

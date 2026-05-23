@@ -37,7 +37,7 @@ public class Vendor {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private boolean verified;
+    private Boolean verified = false;
 
     private String availableTime;
 
