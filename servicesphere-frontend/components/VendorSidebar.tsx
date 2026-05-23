@@ -27,27 +27,27 @@ export default function Sidebar({
   const menus = [
     {
       name: "Dashboard",
-      path: "/dashboard",
+      path: "/vendor/dashboard",
       icon: <LayoutDashboard size={20} />,
     },
     {
       name: "Requests",
-      path: "/dashboard/requests",
+      path: "/vendor/requests",
       icon: <ClipboardList size={20} />,
     },
     {
       name: "Active Services",
-      path: "/dashboard/active",
+      path: "/vendor/active",
       icon: <Wrench size={20} />,
     },
     {
       name: "Earnings",
-      path: "/dashboard/earnings",
+      path: "/vendor/earnings",
       icon: <IndianRupee size={20} />,
     },
     {
       name: "Schedule",
-      path: "/dashboard/schedule",
+      path: "/vendor/schedule",
       icon: <CalendarDays size={20} />,
     },
   ];

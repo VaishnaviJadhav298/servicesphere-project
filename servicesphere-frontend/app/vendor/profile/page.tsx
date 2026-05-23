@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
+import VendorSidebar from "@/components/VendorSidebar";
+import VendorNavbar from "@/components/VendorNavbar";
 
 import { Mail, Phone, MapPin, Briefcase, Camera } from "lucide-react";
 
@@ -131,10 +131,10 @@ export default function ProfilePage() {
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-[#0f172a]">
-      <Sidebar open={open} setOpen={setOpen} />
+      <VendorSidebar open={open} setOpen={setOpen} />
 
       <div className="flex-1 flex flex-col">
-        <Navbar setOpen={setOpen} />
+        <VendorNavbar setOpen={setOpen} />
 
         <div className="p-6 overflow-y-auto">
           <h1 className="text-3xl font-bold dark:text-white">

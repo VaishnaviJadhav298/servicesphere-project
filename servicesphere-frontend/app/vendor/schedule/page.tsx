@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
+import VendorSidebar from "@/components/VendorSidebar";
+import VendorNavbar from "@/components/VendorNavbar";
 
 import {
   CalendarDays,
@@ -46,13 +46,13 @@ export default function SchedulePage() {
     <div className="flex h-screen bg-gray-100 dark:bg-[#0f172a] transition">
 
       {/* Sidebar */}
-      <Sidebar open={open} setOpen={setOpen} />
+      <VendorSidebar open={open} setOpen={setOpen} />
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Navbar */}
-        <Navbar setOpen={setOpen} />
+        <VendorNavbar setOpen={setOpen} />
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8">

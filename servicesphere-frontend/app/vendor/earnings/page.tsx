@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
+import VendorSidebar from "@/components/VendorSidebar";
+import VendorNavbar from "@/components/VendorNavbar";
 
 export default function VendorDeskPage() {
 
@@ -17,13 +17,13 @@ export default function VendorDeskPage() {
     <div className="flex h-screen bg-gray-100 dark:bg-[#0f172a] transition">
 
       {/* Sidebar */}
-      <Sidebar open={open} setOpen={setOpen} />
+      <VendorSidebar open={open} setOpen={setOpen} />
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Navbar */}
-        <Navbar setOpen={setOpen} />
+        <VendorNavbar setOpen={setOpen} />
 
         {/* Content */}
         <div className="p-4 sm:p-6 overflow-y-auto">
