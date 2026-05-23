@@ -159,13 +159,14 @@ export default function CustomerDashboard() {
             </button>
 
             {/* RATINGS */}
-            <button className="flex items-center gap-4 text-lg font-medium hover:text-blue-400 transition">
+             <button onClick={() => router.push("/customer/ratings")
+             }
+              className="flex items-center gap-4 text-lg font-medium hover:text-blue-400 transition">
 
               <Star size={22} />
-              Ratings
-
-            </button>
-
+               Ratings
+ 
+              </button>
           </div>
 
         </div>
