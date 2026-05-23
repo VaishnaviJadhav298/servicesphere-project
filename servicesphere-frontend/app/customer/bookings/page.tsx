@@ -51,9 +51,16 @@ export default function CustomerBookingsPage() {
 
       setError("");
 
-      const response = await API.get(
-        "/bookings/customer/1"
-      );
+      
+      const user =
+  JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+const response =
+  await API.get(
+    `/bookings/customer/${user.id}`
+  );
 
       setBookings(response.data);
 
