@@ -139,6 +139,16 @@ export default function CustomerDashboard() {
 
             </button>
 
+            <button
+            onClick={() => router.push("/customer/services")}
+            className="flex items-center gap-4 text-lg font-medium hover:text-blue-400 transition"
+            >
+
+            <Briefcase size={22} />
+            Explore Services
+
+            </button>
+
             {/* BOOKINGS */}
             <Link
               href="/customer/bookings"

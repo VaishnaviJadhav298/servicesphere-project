@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 import VendorSidebar from "@/components/VendorSidebar";
 import VendorNavbar from "@/components/VendorNavbar";
@@ -16,37 +17,65 @@ export default function SchedulePage() {
 
   const [open, setOpen] = useState(false);
 
-  const [available, setAvailable] = useState(true);
+  const [available, setAvailable] =
+    useState(true);
 
-  const schedules = [
-    {
-      id: 1,
-      time: "5:00 PM",
-      service: "AC Repair",
-      customer: "Rahul Sharma",
-      status: "Upcoming",
-    },
-    {
-      id: 2,
-      time: "1:30 PM",
-      service: "Cleaning Service",
-      customer: "Sneha Patil",
-      status: "In Progress",
-    },
-    {
-      id: 3,
-      time: "10:00 AM",
-      service: "Plumbing Service",
-      customer: "Amit Verma",
-      status: "Completed",
-    },
-  ];
+  const [schedules, setSchedules] =
+    useState([]);
+
+  useEffect(() => {
+
+    fetchSchedules();
+
+  }, []);
+
+  // FETCH SCHEDULES
+  const fetchSchedules = async () => {
+
+    try {
+
+      const vendorId =
+        localStorage.getItem("vendorId");
+
+      if (!vendorId) return;
+
+      const res = await axios.get(
+        `http://localhost:8080/vendor/requests/${vendorId}`
+      );
+
+      // ✅ only accepted + completed
+      const filtered =
+        res.data.filter(
+          (item: any) =>
+            item.status === "ACCEPTED" ||
+            item.status === "COMPLETED"
+        );
+
+      setSchedules(filtered);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+  };
+
+  // COUNTS
+  const completedCount =
+    schedules.filter(
+      (item: any) =>
+        item.status === "COMPLETED"
+    ).length;
 
   return (
+
     <div className="flex h-screen bg-gray-100 dark:bg-[#0f172a] transition">
 
       {/* Sidebar */}
-      <VendorSidebar open={open} setOpen={setOpen} />
+      <VendorSidebar
+        open={open}
+        setOpen={setOpen}
+      />
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -72,20 +101,18 @@ export default function SchedulePage() {
 
             </div>
 
-            {/* Availability Toggle */}
+            {/* Availability */}
             <button
-              onClick={() => setAvailable(!available)}
-              className={`
-                px-5 py-3 rounded-2xl
-                text-white font-medium
-                transition shadow-md
+              onClick={() =>
+                setAvailable(!available)
+              }
+              className={`px-5 py-3 rounded-2xl text-white font-medium transition shadow-md
 
-                ${
-                  available
-                    ? "bg-green-500 hover:bg-green-600"
-                    : "bg-red-500 hover:bg-red-600"
-                }
-              `}
+              ${
+                available
+                  ? "bg-green-500 hover:bg-green-600"
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
             >
               {available
                 ? "🟢 Available Today"
@@ -94,16 +121,11 @@ export default function SchedulePage() {
 
           </div>
 
-          {/* Top Cards */}
+          {/* TOP CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
 
-            {/* Appointments */}
-            <div
-              className="
-                bg-white dark:bg-[#1e293b]
-                rounded-3xl p-6 shadow-sm
-              "
-            >
+            {/* TOTAL */}
+            <div className="bg-white dark:bg-[#1e293b] rounded-3xl p-6 shadow-sm">
 
               <div className="flex items-center justify-between">
 
@@ -114,7 +136,7 @@ export default function SchedulePage() {
                   </p>
 
                   <h2 className="text-4xl font-bold mt-3 dark:text-white">
-                    3
+                    {schedules.length}
                   </h2>
 
                 </div>
@@ -127,13 +149,8 @@ export default function SchedulePage() {
 
             </div>
 
-            {/* Working Hours */}
-            <div
-              className="
-                bg-white dark:bg-[#1e293b]
-                rounded-3xl p-6 shadow-sm
-              "
-            >
+            {/* HOURS */}
+            <div className="bg-white dark:bg-[#1e293b] rounded-3xl p-6 shadow-sm">
 
               <div className="flex items-center justify-between">
 
@@ -157,13 +174,8 @@ export default function SchedulePage() {
 
             </div>
 
-            {/* Completed */}
-            <div
-              className="
-                bg-white dark:bg-[#1e293b]
-                rounded-3xl p-6 shadow-sm
-              "
-            >
+            {/* COMPLETED */}
+            <div className="bg-white dark:bg-[#1e293b] rounded-3xl p-6 shadow-sm">
 
               <div className="flex items-center justify-between">
 
@@ -174,7 +186,7 @@ export default function SchedulePage() {
                   </p>
 
                   <h2 className="text-4xl font-bold mt-3 dark:text-white">
-                    1
+                    {completedCount}
                   </h2>
 
                 </div>
@@ -189,14 +201,8 @@ export default function SchedulePage() {
 
           </div>
 
-          {/* Schedule List */}
-          <div
-            className="
-              mt-10
-              bg-white dark:bg-[#1e293b]
-              rounded-3xl p-6 shadow-sm
-            "
-          >
+          {/* SCHEDULE LIST */}
+          <div className="mt-10 bg-white dark:bg-[#1e293b] rounded-3xl p-6 shadow-sm">
 
             <div className="flex items-center justify-between mb-8">
 
@@ -214,91 +220,94 @@ export default function SchedulePage() {
 
             </div>
 
-            {/* Schedule Cards */}
+            {/* LIST */}
             <div className="space-y-5">
 
-              {schedules.map((item) => (
+              {schedules.length === 0 ? (
 
-                <div
-                  key={item.id}
-                  className="
-                    bg-gray-50 dark:bg-[#0f172a]
-                    rounded-2xl p-5
-                    flex flex-col md:flex-row
-                    md:items-center md:justify-between
-                    gap-4 transition
-                  "
-                >
+                <p className="text-gray-500 dark:text-gray-400">
+                  No schedules found
+                </p>
 
-                  {/* Left */}
-                  <div className="flex gap-4">
+              ) : (
 
-                    {/* Status Dot */}
-                    <div className="mt-1">
+                schedules.map((item: any) => (
 
-                      {item.status === "Completed" ? (
+                  <div
+                    key={item.id}
+                    className="bg-gray-50 dark:bg-[#0f172a] rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 transition"
+                  >
 
-                        <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                    {/* LEFT */}
+                    <div className="flex gap-4">
 
-                      ) : item.status === "In Progress" ? (
+                      {/* STATUS DOT */}
+                      <div className="mt-1">
 
-                        <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                        {item.status === "COMPLETED" ? (
 
-                      ) : (
+                          <div className="w-4 h-4 rounded-full bg-green-500"></div>
 
-                        <Circle
-                          size={16}
-                          className="text-yellow-500 fill-yellow-500"
-                        />
+                        ) : item.status === "ACCEPTED" ? (
 
-                      )}
+                          <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+
+                        ) : (
+
+                          <Circle
+                            size={16}
+                            className="text-yellow-500 fill-yellow-500"
+                          />
+
+                        )}
+
+                      </div>
+
+                      {/* DETAILS */}
+                      <div>
+
+                        <h3 className="text-lg font-semibold dark:text-white">
+                          Service Work
+                        </h3>
+
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                          Booking ID: #{item.id}
+                        </p>
+
+                        <p className="text-sm text-gray-400 mt-1">
+                          ₹{item.amount}
+                        </p>
+
+                      </div>
 
                     </div>
 
-                    {/* Details */}
+                    {/* RIGHT */}
                     <div>
 
-                      <h3 className="text-lg font-semibold dark:text-white">
-                        {item.service}
-                      </h3>
+                      <span
+                        className={`px-4 py-2 rounded-xl text-sm font-medium
 
-                      <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                        Customer: {item.customer}
-                      </p>
-
-                      <p className="text-sm text-gray-400 mt-1">
-                        {item.time}
-                      </p>
+                        ${
+                          item.status === "COMPLETED"
+                            ? "bg-green-100 text-green-700"
+                            : item.status === "ACCEPTED"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {item.status === "ACCEPTED"
+                          ? "In Progress"
+                          : item.status}
+                      </span>
 
                     </div>
 
                   </div>
 
-                  {/* Right */}
-                  <div>
+                ))
 
-                    <span
-                      className={`
-                        px-4 py-2 rounded-xl
-                        text-sm font-medium
-
-                        ${
-                          item.status === "Completed"
-                            ? "bg-green-100 text-green-700"
-                            : item.status === "In Progress"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }
-                      `}
-                    >
-                      {item.status}
-                    </span>
-
-                  </div>
-
-                </div>
-
-              ))}
+              )}
 
             </div>
 

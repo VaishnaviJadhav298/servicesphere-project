@@ -54,4 +54,13 @@ public class ServiceService {
 
         return serviceRepository.save(service);
     }
+    public ServiceEntity assignToVendor(Long serviceId, Long vendorId) {
+
+        ServiceEntity service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        service.setVendorId(vendorId);
+
+        return serviceRepository.save(service);
+    }
 }

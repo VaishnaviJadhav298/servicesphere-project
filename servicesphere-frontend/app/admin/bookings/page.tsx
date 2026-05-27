@@ -1,262 +1,251 @@
 "use client";
 
-import { useState } from "react";
-
-import {
-  ArrowLeft,
-  Search,
-  Sun,
-  Moon,
-  Bell,
-} from "lucide-react";
-
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function AdminBookingsPage() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<any[]>([]);
 
-  const router = useRouter();
+  const [selectedVendor, setSelectedVendor] = useState<{
+    [key: number]: number;
+  }>({});
 
-  const [darkMode, setDarkMode] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
-  const bookings = [
-    {
-      id: "BK001",
-      customer: "Vaishnavi Jadhav",
-      status: "Accepted",
-    },
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
-    {
-      id: "BK002",
-      customer: "Aman Verma",
-      status: "Pending",
-    },
+  useEffect(() => {
+    fetchBookings();
+    fetchVendors();
+  }, []);
 
-    {
-      id: "BK003",
-      customer: "Sneha Patil",
-      status: "OTP Verified",
-    },
+  const fetchBookings = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/admin/bookings");
+      setBookings(res.data);
+    } catch (err) {
+      console.log("Booking fetch error:", err);
+    }
+  };
 
-    {
-      id: "BK004",
-      customer: "Rahul Sharma",
-      status: "Completed",
-    },
-  ];
+  const fetchVendors = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/auth/vendor/all");
+      setVendors(res.data);
+    } catch (err) {
+      console.log("Vendor fetch error:", err);
+    }
+  };
+
+  const assignVendor = async (bookingId: number) => {
+    const vendorId = selectedVendor[bookingId];
+
+    if (!vendorId) {
+      alert("Please select vendor first");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `http://localhost:8080/admin/assign-vendor/${bookingId}/${vendorId}`
+      );
+
+      alert("Vendor Assigned Successfully!");
+      fetchBookings();
+    } catch (err) {
+      console.log(err);
+      alert("Failed to assign vendor");
+    }
+  };
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case "ACCEPTED":
+        return "bg-green-100 text-green-700";
+      case "REJECTED":
+        return "bg-red-100 text-red-700";
+      case "ASSIGNED":
+        return "bg-yellow-100 text-yellow-700";
+      case "PENDING":
+        return "bg-gray-100 text-gray-700";
+      default:
+        return "bg-blue-100 text-blue-700";
+    }
+  };
+
+  const filteredBookings = bookings.filter((b) => {
+    if (statusFilter === "ALL") return true;
+    return b.status === statusFilter;
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentBookings = filteredBookings.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
 
   return (
+    <div className="p-6 bg-gray-100 min-h-screen">
 
-    <div
-      className={`min-h-screen transition-all duration-300 ${
-        darkMode
-          ? "bg-[#0f172a] text-white"
-          : "bg-[#f4f7fb] text-[#0f172a]"
-      }`}
-    >
+      <h1 className="text-3xl font-bold mb-4 text-gray-800">
+        Manage Bookings
+      </h1>
 
-      {/* TOPBAR */}
-      <div
-        className={`flex items-center justify-between px-8 py-5 border-b ${
-          darkMode
-            ? "bg-[#111827] border-white/10"
-            : "bg-white border-gray-200"
-        }`}
-      >
-
-        {/* LEFT */}
-        <div className="flex items-center gap-4">
-
-          {/* BACK BUTTON */}
-          <button
-            onClick={() => router.back()}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition ${
-              darkMode
-                ? "bg-white/10 hover:bg-white/20"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-          >
-
-            <ArrowLeft size={20} />
-
-          </button>
-
-          {/* TITLE */}
-          <div>
-
-            <h1 className="text-[28px] font-bold">
-              Booking Monitoring
-            </h1>
-
-            <p
-              className={`text-[13px] mt-1 ${
-                darkMode
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }`}
-            >
-              Track and manage customer bookings
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* RIGHT */}
-        <div className="flex items-center gap-4">
-
-          {/* SEARCH */}
-          <div
-            className={`flex items-center px-4 h-[48px] w-[320px] rounded-2xl ${
-              darkMode
-                ? "bg-[#1e293b]"
-                : "bg-gray-100"
-            }`}
-          >
-
-            <Search
-              size={18}
-              className={
-                darkMode
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }
-            />
-
-            <input
-              type="text"
-              placeholder="Search bookings..."
-              className={`bg-transparent outline-none ml-3 w-full text-[14px] ${
-                darkMode
-                  ? "placeholder-gray-400"
-                  : "placeholder-gray-500"
-              }`}
-            />
-
-          </div>
-
-          {/* THEME */}
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition ${
-              darkMode
-                ? "bg-white/10 hover:bg-white/20"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-          >
-
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-
-          </button>
-
-          {/* NOTIFICATION */}
-          <button
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center relative ${
-              darkMode
-                ? "bg-white/10 hover:bg-white/20"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-          >
-
-            <Bell size={18} />
-
-            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500"></div>
-
-          </button>
-
-          {/* PROFILE */}
-          {/* <div className="flex items-center gap-3">
-
-            <div className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-              A
-            </div>
-
-            <div>
-
-              <h2 className="text-[14px] font-semibold">
-                Admin
-              </h2>
-
-              <p
-                className={`text-[12px] ${
-                  darkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Super Admin
-              </p>
-
-            // </div>
-
-          </div> */}
-
-        </div>
-
+      {/* FILTER */}
+      <div className="mb-4">
+        <select
+          className="border p-2 rounded-lg"
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="ALL">All</option>
+          <option value="PENDING">Pending</option>
+          <option value="ACCEPTED">Accepted</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="ASSIGNED">Assigned</option>
+        </select>
       </div>
 
-      {/* CONTENT */}
-      <div className="p-8">
+      {/* TABLE */}
+      <div className="overflow-x-auto bg-white rounded-2xl shadow">
 
-        <div className="space-y-4">
+        <table className="w-full border-collapse border border-gray-300">
 
-          {bookings.map((booking, index) => (
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-4 text-left border border-gray-300">Booking ID</th>
+              <th className="p-4 text-center border border-gray-300">Service ID</th>
+              <th className="p-4 text-center border border-gray-300">Customer ID</th>
+              <th className="p-4 text-left border border-gray-300">Amount</th>
+              <th className="p-4 text-left border border-gray-300">Address</th>
+              <th className="p-4 text-left border border-gray-300">Status</th>
+              <th className="p-4 text-left border border-gray-300">Assign Vendor</th>
+            </tr>
+          </thead>
 
-            <button
-              key={index}
-              onClick={() =>
-                router.push(`/admin/bookings/${booking.id}`)
-              }
-              className={`w-full rounded-[24px] px-6 py-5 border flex items-center justify-between transition-all duration-300 hover:scale-[1.01] ${
-                darkMode
-                  ? "bg-[#111827] border-white/10 hover:bg-[#172033]"
-                  : "bg-white border-gray-200 hover:shadow-md"
-              }`}
-            >
-
-              {/* LEFT */}
-              <div className="text-left">
-
-                <h2 className="text-[19px] font-bold">
-                  {booking.customer}
-                </h2>
-
-                <p
-                  className={`text-[13px] mt-1 ${
-                    darkMode
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
+          <tbody>
+            {currentBookings.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="text-center p-6 text-gray-500 border border-gray-300"
                 >
-                  Booking ID : {booking.id}
-                </p>
+                  No bookings found
+                </td>
+              </tr>
+            ) : (
+              currentBookings.map((b) => (
+                <tr key={b.id} className="hover:bg-gray-50">
 
-              </div>
+                  <td className="p-4 border border-gray-300">#{b.id}</td>
 
-              {/* STATUS */}
-              <div
-                className={`px-5 py-2 rounded-xl text-[13px] font-semibold ${
-                  booking.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : booking.status === "Accepted"
-                    ? "bg-blue-100 text-blue-700"
-                    : booking.status === "OTP Verified"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-purple-100 text-purple-700"
-                }`}
-              >
-                {booking.status}
-              </div>
+                  <td className="p-4 border border-gray-300 text-center">
+                    {b.serviceId}
+                  </td>
 
-            </button>
+                  <td className="p-4 border border-gray-300 text-center">
+                    {b.customerId}
+                  </td>
 
-          ))}
+                  <td className="p-4 border border-gray-300">
+                    ₹{b.amount}
+                  </td>
 
-        </div>
+                  <td className="p-4 border border-gray-300">
+                    {b.address}
+                  </td>
+
+                  <td className="p-4 border border-gray-300">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(
+                        b.status
+                      )}`}
+                    >
+                      {b.status}
+                    </span>
+                  </td>
+
+                  <td className="p-4 border border-gray-300">
+                    {b.status === "PENDING" ? (
+                      <div className="flex gap-2">
+
+                        <select
+                          className="border p-2 rounded-lg"
+                          value={selectedVendor[b.id] || ""}
+                          onChange={(e) =>
+                            setSelectedVendor({
+                              ...selectedVendor,
+                              [b.id]: Number(e.target.value),
+                            })
+                          }
+                        >
+                          <option value="">Select Vendor</option>
+                          {vendors.map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.name}
+                            </option>
+                          ))}
+                        </select>
+
+                        <button
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                          onClick={() => assignVendor(b.id)}
+                        >
+                          Assign
+                        </button>
+
+                      </div>
+                    ) : b.vendorId ? (
+                      <span className="text-green-700 font-semibold">
+                        Vendor ID: {b.vendorId}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Not Assigned</span>
+                    )}
+                  </td>
+
+                </tr>
+              ))
+            )}
+          </tbody>
+
+        </table>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-center mt-6 gap-2">
+
+        <button
+          className="px-4 py-2 bg-gray-300 rounded"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          Prev
+        </button>
+
+        <span className="px-4 py-2">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          className="px-4 py-2 bg-gray-300 rounded"
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next
+        </button>
 
       </div>
 
     </div>
-
   );
-
 }

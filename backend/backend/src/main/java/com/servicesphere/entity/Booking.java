@@ -35,4 +35,6 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+
+
 }

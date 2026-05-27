@@ -53,4 +53,11 @@ public class ServiceController {
                 service
         );
     }
+    @PostMapping("/assign")
+    public ServiceEntity assignServiceToVendor(
+            @RequestParam Long serviceId,
+            @RequestParam Long vendorId
+    ) {
+        return serviceService.assignToVendor(serviceId, vendorId);
+    }
 }

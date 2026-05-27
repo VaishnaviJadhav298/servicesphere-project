@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 
+import axios from "axios";
+
 import {
   Camera,
   Mail,
@@ -27,34 +29,88 @@ export default function CustomerProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
 
   const [profile, setProfile] = useState({
-    name: "Vaishnavi Jadhav",
-    email: "vaishnavi@gmail.com",
-    phone: "9876543210",
-    address: "Aurangabad, Maharashtra",
+    id: "",
+    fullName: "",
+    email: "",
+    mobileNumber: "",
+    address: "",
   });
 
   const [temp, setTemp] = useState(profile);
 
-  // FIX HYDRATION / MOUNT ERROR
+  // FETCH USER
   useEffect(() => {
+
     setMounted(true);
+
+    const user =
+      JSON.parse(
+        localStorage.getItem("user") || "{}"
+      );
+
+    if (user?.id) {
+
+      setProfile(user);
+
+      setTemp(user);
+
+    }
+
   }, []);
 
   if (!mounted) return null;
 
   const handleEdit = () => {
+
     setTemp(profile);
+
     setIsEditing(true);
+
   };
 
-  const handleSave = () => {
-    setProfile(temp);
-    setIsEditing(false);
+  // SAVE PROFILE
+  const handleSave = async () => {
+
+    try {
+
+      const response =
+        await axios.put(
+
+          `http://localhost:8080/api/auth/update/${profile.id}`,
+
+          temp
+
+        );
+
+      setProfile(response.data);
+
+      setTemp(response.data);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data)
+      );
+
+      setIsEditing(false);
+
+      alert("Profile Updated Successfully");
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Update Failed");
+
+    }
+
   };
 
   const handleCancel = () => {
+
     setTemp(profile);
+
     setIsEditing(false);
+
   };
 
   return (
@@ -111,7 +167,7 @@ export default function CustomerProfilePage() {
 
         </div>
 
-        {/* DARK MODE TOGGLE */}
+        {/* DARK MODE */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-md transition hover:scale-105 ${
@@ -127,7 +183,7 @@ export default function CustomerProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* LEFT PROFILE CARD */}
+        {/* LEFT CARD */}
         <div
           className={`rounded-3xl shadow-sm border p-6 ${
             darkMode
@@ -136,13 +192,14 @@ export default function CustomerProfilePage() {
           }`}
         >
 
-          {/* AVATAR */}
           <div className="flex flex-col items-center">
 
             <div className="relative">
 
               <div className="w-32 h-32 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center text-white text-5xl font-bold shadow-lg">
-                {profile.name.charAt(0)}
+
+                {profile.fullName?.charAt(0)}
+
               </div>
 
               <button
@@ -158,7 +215,7 @@ export default function CustomerProfilePage() {
             </div>
 
             <h2 className="text-2xl font-bold mt-4">
-              {profile.name}
+              {profile.fullName}
             </h2>
 
             <p
@@ -173,80 +230,9 @@ export default function CustomerProfilePage() {
 
           </div>
 
-          {/* QUICK INFO */}
-          <div className="mt-6 space-y-4">
-
-            <div
-              className={`p-4 rounded-2xl border ${
-                darkMode
-                  ? "bg-[#0f172a] border-gray-700"
-                  : "bg-gray-50 border-gray-100"
-              }`}
-            >
-              <p
-                className={`text-sm ${
-                  darkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Total Bookings
-              </p>
-
-              <h3 className="text-2xl font-bold mt-1">
-                12
-              </h3>
-            </div>
-
-            <div
-              className={`p-4 rounded-2xl border ${
-                darkMode
-                  ? "bg-[#0f172a] border-gray-700"
-                  : "bg-gray-50 border-gray-100"
-              }`}
-            >
-              <p
-                className={`text-sm ${
-                  darkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Completed Services
-              </p>
-
-              <h3 className="text-2xl font-bold text-green-500 mt-1">
-                9
-              </h3>
-            </div>
-
-            <div
-              className={`p-4 rounded-2xl border ${
-                darkMode
-                  ? "bg-[#0f172a] border-gray-700"
-                  : "bg-gray-50 border-gray-100"
-              }`}
-            >
-              <p
-                className={`text-sm ${
-                  darkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Total Spent
-              </p>
-
-              <h3 className="text-2xl font-bold text-blue-500 mt-1">
-                ₹14K
-              </h3>
-            </div>
-
-          </div>
-
         </div>
 
-        {/* RIGHT SECTION */}
+        {/* RIGHT */}
         <div
           className={`lg:col-span-2 rounded-3xl shadow-sm border p-8 ${
             darkMode
@@ -255,7 +241,7 @@ export default function CustomerProfilePage() {
           }`}
         >
 
-          {/* TOP BAR */}
+          {/* TOP */}
           <div className="flex justify-between items-center mb-8">
 
             <div>
@@ -263,16 +249,6 @@ export default function CustomerProfilePage() {
               <h2 className="text-2xl font-bold">
                 Personal Details
               </h2>
-
-              <p
-                className={`text-sm mt-1 ${
-                  darkMode
-                    ? "text-gray-400"
-                    : "text-gray-500"
-                }`}
-              >
-                Update your profile information
-              </p>
 
             </div>
 
@@ -327,9 +303,12 @@ export default function CustomerProfilePage() {
 
               <input
                 disabled={!isEditing}
-                value={temp.name}
+                value={temp.fullName}
                 onChange={(e) =>
-                  setTemp({ ...temp, name: e.target.value })
+                  setTemp({
+                    ...temp,
+                    fullName: e.target.value,
+                  })
                 }
                 className={`w-full mt-2 p-4 rounded-2xl border outline-none transition ${
                   darkMode
@@ -356,11 +335,7 @@ export default function CustomerProfilePage() {
               >
 
                 <Mail
-                  className={`mr-3 ${
-                    darkMode
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
+                  className="mr-3"
                   size={18}
                 />
 
@@ -368,7 +343,10 @@ export default function CustomerProfilePage() {
                   disabled={!isEditing}
                   value={temp.email}
                   onChange={(e) =>
-                    setTemp({ ...temp, email: e.target.value })
+                    setTemp({
+                      ...temp,
+                      email: e.target.value,
+                    })
                   }
                   className="w-full outline-none bg-transparent"
                 />
@@ -393,19 +371,18 @@ export default function CustomerProfilePage() {
               >
 
                 <Phone
-                  className={`mr-3 ${
-                    darkMode
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
+                  className="mr-3"
                   size={18}
                 />
 
                 <input
                   disabled={!isEditing}
-                  value={temp.phone}
+                  value={temp.mobileNumber}
                   onChange={(e) =>
-                    setTemp({ ...temp, phone: e.target.value })
+                    setTemp({
+                      ...temp,
+                      mobileNumber: e.target.value,
+                    })
                   }
                   className="w-full outline-none bg-transparent"
                 />
@@ -430,11 +407,7 @@ export default function CustomerProfilePage() {
               >
 
                 <MapPin
-                  className={`mr-3 ${
-                    darkMode
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
+                  className="mr-3"
                   size={18}
                 />
 
@@ -442,7 +415,10 @@ export default function CustomerProfilePage() {
                   disabled={!isEditing}
                   value={temp.address}
                   onChange={(e) =>
-                    setTemp({ ...temp, address: e.target.value })
+                    setTemp({
+                      ...temp,
+                      address: e.target.value,
+                    })
                   }
                   className="w-full outline-none bg-transparent"
                 />
@@ -451,17 +427,6 @@ export default function CustomerProfilePage() {
 
             </div>
 
-          </div>
-
-          {/* FOOTER */}
-          <div
-            className={`mt-10 pt-6 border-t text-sm ${
-              darkMode
-                ? "border-gray-700 text-gray-400"
-                : "border-gray-200 text-gray-500"
-            }`}
-          >
-            Customer Profile • ServiceSphere
           </div>
 
         </div>

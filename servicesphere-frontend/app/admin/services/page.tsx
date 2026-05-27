@@ -1,270 +1,306 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 import {
-  Plus,
+  Pencil,
   Trash2,
-  ArrowLeft,
-  Briefcase,
-  Moon,
-  Sun,
+  Plus,
 } from "lucide-react";
 
-import { useRouter } from "next/navigation";
+interface Service {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+}
 
-export default function AdminServicesPage() {
+export default function ServicesPage() {
 
-  const router = useRouter();
+  const [services, setServices] = useState<Service[]>([]);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
 
-  const [serviceName, setServiceName] = useState("");
+  const [editId, setEditId] = useState<number | null>(null);
 
-  const [services, setServices] = useState([
-    "Car Wash",
-    "Home Cleaning",
-    "Electrician",
-    "Plumbing",
-  ]);
+  // FETCH SERVICES
+  const fetchServices = async () => {
 
-  // ADD SERVICE
-  const handleAddService = () => {
+    try {
 
-    if (serviceName.trim() === "") return;
+      const response = await axios.get(
+        "http://localhost:8080/api/services"
+      );
 
-    setServices([...services, serviceName]);
+      setServices(response.data);
 
-    setServiceName("");
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  useEffect(() => {
+
+    fetchServices();
+
+  }, []);
+
+  // ADD OR UPDATE
+  const handleSave = async () => {
+
+    if (!name || !description || !price) {
+
+      alert("Please fill all fields");
+      return;
+
+    }
+
+    try {
+
+      const serviceData = {
+        name,
+        description,
+        price: Number(price),
+      };
+
+      // UPDATE
+      if (editId !== null) {
+
+        await axios.put(
+          `http://localhost:8080/api/services/${editId}`,
+          serviceData
+        );
+
+        alert("Service updated");
+
+      } else {
+
+        // CREATE
+        await axios.post(
+          "http://localhost:8080/api/services",
+          serviceData
+        );
+
+        alert("Service added");
+
+      }
+
+      // CLEAR
+      setName("");
+      setDescription("");
+      setPrice("");
+      setEditId(null);
+
+      fetchServices();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
 
   };
 
   // DELETE
-  const handleDelete = (index: number) => {
+  const handleDelete = async (id: number) => {
 
-    const updatedServices = services.filter(
-      (_, i) => i !== index
-    );
+    try {
 
-    setServices(updatedServices);
+      await axios.delete(
+        `http://localhost:8080/api/services/${id}`
+      );
+
+      fetchServices();
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  // EDIT
+  const handleEdit = (service: Service) => {
+
+    setName(service.name);
+    setDescription(service.description);
+    setPrice(service.price.toString());
+
+    setEditId(service.id);
 
   };
 
   return (
 
-    <div
-      className={`min-h-screen p-8 transition duration-500 ${
-        darkMode
-          ? "bg-[#0f172a]"
-          : "bg-[#f5f7fb]"
-      }`}
-    >
+    <div className="min-h-screen bg-[#f5f7fb] p-10">
 
-      {/* TOPBAR */}
-      <div className="flex items-center justify-between mb-8">
+      {/* HEADER */}
+      <div className="mb-10">
 
-        {/* LEFT */}
-        <div className="flex items-center gap-4">
+        <h1 className="text-4xl font-bold text-gray-800">
 
-          {/* BACK */}
-          <button
-            onClick={() => router.push("/admin/dashboard")}
-            className={`p-3 rounded-xl border transition duration-300 hover:scale-105
-              ${
-                darkMode
-                  ? "bg-[#1e293b] border-gray-700 text-white"
-                  : "bg-white border-gray-200 text-black"
-              }`}
-          >
+          Manage Services
 
-            <ArrowLeft size={22} />
+        </h1>
 
-          </button>
+        <p className="text-gray-500 mt-2">
 
-          <div>
+          Create, update and delete services
 
-            <h1
-              className={`text-4xl font-bold ${
-                darkMode
-                  ? "text-white"
-                  : "text-gray-900"
-              }`}
-            >
+        </p>
 
-              Manage Services
+      </div>
 
-            </h1>
+      {/* FORM */}
+      <div className="bg-white p-8 rounded-3xl border shadow-sm mb-10">
 
-            <p
-              className={`mt-1 ${
-                darkMode
-                  ? "text-gray-400"
-                  : "text-gray-500"
-              }`}
-            >
+        <h2 className="text-2xl font-semibold mb-6">
 
-              Add and manage predefined services
+          {editId !== null
+            ? "Update Service"
+            : "Add Service"}
 
-            </p>
+        </h2>
 
-          </div>
+        <div className="grid grid-cols-3 gap-5">
+
+          {/* NAME */}
+          <input
+            type="text"
+            placeholder="Service Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="border rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* DESCRIPTION */}
+          <input
+            type="text"
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="border rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* PRICE */}
+          <input
+            type="number"
+            placeholder="Price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="border rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
         </div>
 
-        {/* MODE BUTTON */}
+        {/* BUTTON */}
         <button
-          onClick={() => setDarkMode(!darkMode)}
-          className={`p-4 rounded-2xl transition duration-300 hover:scale-105
-            ${
-              darkMode
-                ? "bg-yellow-400 text-black"
-                : "bg-black text-white"
-            }`}
+          onClick={handleSave}
+          className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl flex items-center gap-2 transition"
         >
 
-          {darkMode ? <Sun /> : <Moon />}
+          <Plus size={20} />
+
+          {editId !== null
+            ? "Update Service"
+            : "Add Service"}
 
         </button>
 
       </div>
 
-      {/* ADD CARD */}
-      <div
-        className={`rounded-3xl border p-6 mb-8 shadow-sm hover:shadow-lg transition duration-300
-          ${
-            darkMode
-              ? "bg-[#1e293b] border-gray-700"
-              : "bg-white border-gray-200"
-          }`}
-      >
-
-        {/* HEADING */}
-        <div className="flex items-center gap-3 mb-5">
-
-          <div className="bg-blue-100 p-3 rounded-xl">
-
-            <Plus className="text-blue-600" size={22} />
-
-          </div>
-
-          <h2
-            className={`text-2xl font-bold ${
-              darkMode
-                ? "text-white"
-                : "text-gray-800"
-            }`}
-          >
-
-            Add New Service
-
-          </h2>
-
-        </div>
-
-        {/* INPUT */}
-        <div className="flex gap-4">
-
-          <input
-            type="text"
-            placeholder="Enter service name"
-            value={serviceName}
-            onChange={(e) => setServiceName(e.target.value)}
-            className={`flex-1 rounded-xl px-5 py-3 text-lg outline-none border transition
-              ${
-                darkMode
-                  ? "bg-[#0f172a] border-gray-700 text-white placeholder-gray-400"
-                  : "bg-white border-gray-300 text-black placeholder-gray-500"
-              }`}
-          />
-
-          {/* ADD BUTTON */}
-          <button
-            onClick={handleAddService}
-            className="bg-blue-600 hover:bg-blue-700 hover:scale-105 transition duration-300 text-white px-7 rounded-xl font-semibold flex items-center gap-2"
-          >
-
-            <Plus size={20} />
-            Add
-
-          </button>
-
-        </div>
-
-      </div>
-
       {/* SERVICES */}
-      <div className="grid grid-cols-2 gap-5">
+      <div className="bg-white p-8 rounded-3xl border shadow-sm">
 
-        {services.map((service, index) => (
+        <h2 className="text-2xl font-semibold mb-6">
 
-          <div
-            key={index}
-            className={`rounded-3xl p-5 border flex items-center justify-between hover:-translate-y-1 hover:shadow-xl transition duration-300
-              ${
-                darkMode
-                  ? "bg-[#1e293b] border-gray-700"
-                  : "bg-white border-gray-200"
-              }`}
-          >
+          All Services
 
-            {/* LEFT */}
-            <div className="flex items-center gap-4">
+        </h2>
 
-              <div className="bg-blue-100 p-3 rounded-xl">
+        {
+          services.length === 0 ? (
 
-                <Briefcase
-                  className="text-blue-600"
-                  size={22}
-                />
+            <p className="text-gray-500">
 
-              </div>
+              No services available
 
-              <div>
+            </p>
 
-                <h1
-                  className={`text-xl font-semibold ${
-                    darkMode
-                      ? "text-white"
-                      : "text-gray-800"
-                  }`}
+          ) : (
+
+            <div className="space-y-5">
+
+              {services.map((service) => (
+
+                <div
+                  key={service.id}
+                  className="border rounded-2xl p-5 flex items-center justify-between"
                 >
 
-                  {service}
+                  {/* LEFT */}
+                  <div>
 
-                </h1>
+                    <h1 className="text-xl font-semibold text-gray-800">
 
-                <p
-                  className={`text-sm ${
-                    darkMode
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
-                >
+                      {service.name}
 
-                  Active Service
+                    </h1>
 
-                </p>
+                    <p className="text-gray-500 mt-1">
 
-              </div>
+                      {service.description}
+
+                    </p>
+
+                    <p className="text-blue-600 font-semibold mt-2">
+
+                      ₹{service.price}
+
+                    </p>
+
+                  </div>
+
+                  {/* RIGHT */}
+                  <div className="flex items-center gap-4">
+
+                    {/* EDIT */}
+                    <button
+                      onClick={() => handleEdit(service)}
+                      className="bg-yellow-400 hover:bg-yellow-500 text-white p-3 rounded-xl transition"
+                    >
+
+                      <Pencil size={18} />
+
+                    </button>
+
+                    {/* DELETE */}
+                    <button
+                      onClick={() => handleDelete(service.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-xl transition"
+                    >
+
+                      <Trash2 size={18} />
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ))}
 
             </div>
 
-            {/* DELETE */}
-            <button
-              onClick={() => handleDelete(index)}
-              className="bg-red-100 hover:bg-red-200 hover:scale-105 transition duration-300 p-3 rounded-xl"
-            >
-
-              <Trash2
-                className="text-red-600"
-                size={20}
-              />
-
-            </button>
-
-          </div>
-
-        ))}
+          )
+        }
 
       </div>
 

@@ -43,4 +43,31 @@ public class AuthService {
 
         return user;
     }
+    public User getUserByEmail(String email) {
+
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+    }
+    public User updateUser(
+            Long id,
+            User updatedUser
+    ) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        user.setFullName(updatedUser.getFullName());
+
+        user.setEmail(updatedUser.getEmail());
+
+        user.setMobileNumber(updatedUser.getMobileNumber());
+
+        user.setAddress(updatedUser.getAddress());
+
+        return userRepository.save(user);
+
+    }
 }

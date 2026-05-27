@@ -32,4 +32,20 @@ public class AuthController {
 
         return authService.login(request);
     }
+    @GetMapping("/user/{email}")
+    public User getUserByEmail(
+            @PathVariable String email
+    ) {
+
+        return authService.getUserByEmail(email);
+    }
+    @PutMapping("/update/{id}")
+    public User updateUser(
+            @PathVariable Long id,
+            @RequestBody User updatedUser
+    ) {
+
+        return authService.updateUser(id, updatedUser);
+
+    }
 }

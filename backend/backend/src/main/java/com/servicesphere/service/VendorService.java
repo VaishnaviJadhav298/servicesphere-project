@@ -24,14 +24,6 @@ public class VendorService {
 
         vendor.setVerified(true);
 
-
-        // Long serviceId = vendor.getService().getId();
-        //
-        // ServiceCategory service = serviceRepository.findById(serviceId)
-        //         .orElseThrow(() -> new RuntimeException("Service not found"));
-        //
-        // vendor.setService(service);
-
         return vendorRepository.save(vendor);
     }
 
@@ -66,17 +58,6 @@ public class VendorService {
         vendor.setAddress(updatedVendor.getAddress());
         vendor.setAvailableTime(updatedVendor.getAvailableTime());
         vendor.setExperience(updatedVendor.getExperience());
-
-        // vendor.setPassword(updatedVendor.getPassword());
-
-        // commented service logic kept safe
-        // Long serviceId = updatedVendor.getService().getId();
-        //
-        // ServiceCategory service = serviceRepository.findById(serviceId)
-        //         .orElseThrow(() -> new RuntimeException("Service not found"));
-        //
-        // vendor.setService(service);
-
         vendor.setServiceName(updatedVendor.getServiceName());
 
         return vendorRepository.save(vendor);
