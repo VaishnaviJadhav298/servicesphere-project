@@ -177,6 +177,18 @@ export default function CustomerDashboard() {
                Ratings
  
               </button>
+              {/* COMPLAINTS */}
+              <button
+              onClick={() =>
+              router.push("/customer/complaints")
+              }
+              className="flex items-center gap-4 text-lg font-medium hover:text-blue-400 transition"
+              >
+
+              <Bell size={22} />
+              Complaints
+
+              </button>
           </div>
 
         </div>

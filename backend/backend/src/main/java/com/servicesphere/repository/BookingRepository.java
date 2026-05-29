@@ -10,5 +10,7 @@ public interface BookingRepository
 
     List<Booking> findByCustomerId(Long customerId);
     List<Booking> findByVendorId(Long vendorId);
+    long countByCustomerId(Long customerId);
+
 
 }

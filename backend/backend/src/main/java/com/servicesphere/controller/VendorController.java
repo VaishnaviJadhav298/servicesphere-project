@@ -155,4 +155,16 @@ public class VendorController {
 
         return bookingService.getVendorRequests(vendorId);
     }
+    // COMPLETE BOOKING WITH OTP
+    @PutMapping("/complete/{bookingId}")
+    public Booking completeBooking(
+            @PathVariable Long bookingId,
+            @RequestParam String otp
+    ) {
+
+        return bookingService.completeBooking(
+                bookingId,
+                otp
+        );
+    }
 }

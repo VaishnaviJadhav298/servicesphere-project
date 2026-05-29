@@ -13,4 +13,5 @@ public class VendorResponseDTO {
     private String availableTime;
     private String serviceName;
     private String experience;
+    private String status;
 }

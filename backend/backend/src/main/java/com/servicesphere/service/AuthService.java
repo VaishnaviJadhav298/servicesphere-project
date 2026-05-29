@@ -13,13 +13,13 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    // REGISTER USER
+    // REGISTER USER (CUSTOMER)
     public User register(RegisterRequestDto request) {
 
         User user = new User();
 
         user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setEmail(request.getEmail().trim().toLowerCase());
         user.setPassword(request.getPassword());
         user.setMobileNumber(request.getMobileNumber());
         user.setAddress(request.getAddress());
@@ -27,47 +27,46 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    // LOGIN USER
+    // LOGIN USER (FIXED)
     public User login(LoginRequestDto request) {
 
-        User user = userRepository
-                .findByEmail(request.getEmail())
+        String email = request.getEmail().trim().toLowerCase();
+        String password = request.getPassword().trim();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new RuntimeException("Invalid email or user not found"));
 
-        if (!user.getPassword()
-                .equals(request.getPassword())) {
-
+        if (!user.getPassword().equals(password)) {
             throw new RuntimeException("Invalid password");
         }
 
         return user;
     }
-    public User getUserByEmail(String email) {
 
-        return userRepository
-                .findByEmail(email)
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
     }
-    public User updateUser(
-            Long id,
-            User updatedUser
-    ) {
+
+    public User updateUser(Long id, User updatedUser) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
         user.setFullName(updatedUser.getFullName());
-
         user.setEmail(updatedUser.getEmail());
-
         user.setMobileNumber(updatedUser.getMobileNumber());
-
         user.setAddress(updatedUser.getAddress());
 
         return userRepository.save(user);
+    }
 
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found with id: " + id));
     }
 }

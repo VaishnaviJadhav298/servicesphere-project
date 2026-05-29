@@ -8,6 +8,7 @@ import VendorNavbar from "@/components/VendorNavbar";
 
 type Service = {
   id: number;
+  vendorId?: number;
   name: string;
   description: string;
   price: number;
@@ -26,16 +27,39 @@ export default function ActivePage() {
   const [myServices, setMyServices] =
     useState<Service[]>([]);
 
-  // FETCH ALL SERVICES
+  // FETCH SERVICES
   const fetchServices = async () => {
 
     try {
+
+      const vendorId =
+        localStorage.getItem("vendorId");
+
+      if (!vendorId) return;
 
       const res = await axios.get(
         "http://localhost:8080/api/services"
       );
 
-      setAvailableServices(res.data);
+      const allServices = res.data;
+
+      // AVAILABLE SERVICES
+      const available =
+        allServices.filter(
+          (service: Service) =>
+            !service.vendorId
+        );
+
+      // MY SERVICES
+      const mine =
+        allServices.filter(
+          (service: Service) =>
+            service.vendorId === Number(vendorId)
+        );
+
+      setAvailableServices(available);
+
+      setMyServices(mine);
 
     } catch (err) {
 
@@ -59,15 +83,12 @@ export default function ActivePage() {
       const vendorId =
         localStorage.getItem("vendorId");
 
-      console.log("Clicked Service:", service);
-
       if (!vendorId) {
 
         alert("Vendor not logged in");
         return;
       }
 
-      // BACKEND SAVE
       await axios.post(
         "http://localhost:8080/api/services/assign",
         null,
@@ -79,26 +100,12 @@ export default function ActivePage() {
         }
       );
 
-      // ADD TO MY SERVICES
-      setMyServices((prev) => {
+      alert("Service selected");
 
-        const alreadyExists = prev.some(
-          (s) => s.id === service.id
-        );
+      // REFRESH DATA
+      fetchServices();
 
-        if (alreadyExists) return prev;
-
-        return [...prev, service];
-      });
-
-      // REMOVE FROM AVAILABLE
-      setAvailableServices((prev) =>
-        prev.filter(
-          (item) => item.id !== service.id
-        )
-      );
-
-      // AUTO SWITCH TAB
+      // SWITCH TAB
       setActiveTab("my");
 
     } catch (err) {
@@ -106,37 +113,38 @@ export default function ActivePage() {
       console.log("Select error:", err);
 
       alert(
-        "Service assign failed. Check backend."
+        "Service assign failed"
       );
     }
   };
 
   // CANCEL SERVICE
-  const handleCancelService = (
+  const handleCancelService = async (
     service: Service
   ) => {
 
-    // REMOVE FROM MY SERVICES
-    setMyServices((prev) =>
-      prev.filter(
-        (item) => item.id !== service.id
-      )
-    );
+    try {
 
-    // ADD BACK TO AVAILABLE
-    setAvailableServices((prev) => {
-
-      const alreadyExists = prev.some(
-        (s) => s.id === service.id
+      await axios.put(
+        `http://localhost:8080/api/services/${service.id}`,
+        {
+          ...service,
+          vendorId: null,
+        }
       );
 
-      if (alreadyExists) return prev;
+      alert("Service cancelled");
 
-      return [...prev, service];
-    });
+      fetchServices();
 
-    // SWITCH TAB
-    setActiveTab("available");
+      setActiveTab("available");
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert("Cancel failed");
+    }
   };
 
   return (
@@ -161,9 +169,7 @@ export default function ActivePage() {
         <div className="p-6 overflow-y-auto">
 
           <h1 className="text-2xl font-bold mb-6 dark:text-white">
-
             Services
-
           </h1>
 
           {/* TABS */}
@@ -179,9 +185,7 @@ export default function ActivePage() {
                   : "bg-white dark:bg-[#1e293b] dark:text-white"
               }`}
             >
-
               Available Services
-
             </button>
 
             <button
@@ -194,9 +198,7 @@ export default function ActivePage() {
                   : "bg-white dark:bg-[#1e293b] dark:text-white"
               }`}
             >
-
               My Services
-
             </button>
 
           </div>
@@ -209,9 +211,7 @@ export default function ActivePage() {
               {availableServices.length === 0 ? (
 
                 <p className="text-gray-500 dark:text-gray-300">
-
                   No services available
-
                 </p>
 
               ) : (
@@ -224,21 +224,15 @@ export default function ActivePage() {
                   >
 
                     <h2 className="text-xl font-semibold dark:text-white mb-3">
-
                       {service.name}
-
                     </h2>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-
                       {service.description}
-
                     </p>
 
                     <p className="text-indigo-600 font-semibold mb-4">
-
                       ₹{service.price}
-
                     </p>
 
                     <button
@@ -246,11 +240,9 @@ export default function ActivePage() {
                       onClick={() =>
                         handleSelectService(service)
                       }
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg cursor-pointer transition"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition"
                     >
-
                       Select Service
-
                     </button>
 
                   </div>
@@ -269,9 +261,7 @@ export default function ActivePage() {
               {myServices.length === 0 ? (
 
                 <p className="text-gray-500 dark:text-gray-300">
-
                   No selected services
-
                 </p>
 
               ) : (
@@ -284,21 +274,15 @@ export default function ActivePage() {
                   >
 
                     <h2 className="text-xl font-semibold dark:text-white mb-3">
-
                       {service.name}
-
                     </h2>
 
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-
                       {service.description}
-
                     </p>
 
                     <p className="text-indigo-600 font-semibold mb-4">
-
                       ₹{service.price}
-
                     </p>
 
                     <button
@@ -306,11 +290,9 @@ export default function ActivePage() {
                       onClick={() =>
                         handleCancelService(service)
                       }
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg cursor-pointer transition"
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
                     >
-
                       Cancel
-
                     </button>
 
                   </div>

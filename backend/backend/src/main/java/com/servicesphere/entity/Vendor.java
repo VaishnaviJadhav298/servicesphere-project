@@ -5,7 +5,6 @@ import lombok.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-
 @Entity
 @Table(name = "vendors")
 
@@ -37,7 +36,7 @@ public class Vendor {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private Boolean verified = false;
+    private String status;
 
     private String availableTime;
 
@@ -46,5 +45,4 @@ public class Vendor {
     private String experience;
 
     private String profileImage;
-
 }

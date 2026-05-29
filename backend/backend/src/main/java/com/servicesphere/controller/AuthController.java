@@ -5,6 +5,7 @@ import com.servicesphere.dto.RegisterRequestDto;
 import com.servicesphere.entity.User;
 import com.servicesphere.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,37 +16,36 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    // SIGNUP
+    // SIGNUP (CUSTOMER)
     @PostMapping("/signup")
-    public User signup(
-            @RequestBody RegisterRequestDto request
-    ) {
-
-        return authService.register(request);
+    public ResponseEntity<User> signup(@RequestBody RegisterRequestDto request) {
+        User user = authService.register(request);
+        return ResponseEntity.ok(user);
     }
 
-    // SIGNIN
+    // SIGNIN (CUSTOMER FIXED)
     @PostMapping("/signin")
-    public User signin(
-            @RequestBody LoginRequestDto request
-    ) {
-
-        return authService.login(request);
+    public ResponseEntity<?> signin(@RequestBody LoginRequestDto request) {
+        try {
+            User user = authService.login(request);
+            return ResponseEntity.ok(user);
+        } catch (RuntimeException ex) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
     }
-    @GetMapping("/user/{email}")
-    public User getUserByEmail(
-            @PathVariable String email
-    ) {
 
-        return authService.getUserByEmail(email);
+    @GetMapping("/user/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return authService.getUserById(id);
     }
+
     @PutMapping("/update/{id}")
     public User updateUser(
             @PathVariable Long id,
             @RequestBody User updatedUser
     ) {
-
         return authService.updateUser(id, updatedUser);
-
     }
 }

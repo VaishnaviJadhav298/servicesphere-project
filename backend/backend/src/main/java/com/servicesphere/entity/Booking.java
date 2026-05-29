@@ -36,5 +36,7 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
 
+    private Boolean otpVerified = false;
+
 
 }

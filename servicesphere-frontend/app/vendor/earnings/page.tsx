@@ -16,17 +16,17 @@ export default function VendorDeskPage() {
 
   // DATA
   const [activeWorks, setActiveWorks] =
-    useState([]);
+    useState<any[]>([]);
 
   const [completedWorks, setCompletedWorks] =
-    useState([]);
+    useState<any[]>([]);
 
   const [earnings, setEarnings] =
-    useState([]);
+    useState<any[]>([]);
 
   // OTP INPUTS
   const [otpValues, setOtpValues] =
-    useState({});
+    useState<any>({});
 
   useEffect(() => {
 
@@ -45,7 +45,7 @@ export default function VendorDeskPage() {
       if (!vendorId) return;
 
       const res = await axios.get(
-        `http://localhost:8080/vendor/requests/${vendorId}`
+        `http://localhost:8080/auth/vendor/requests/${vendorId}`
       );
 
       const allWorks = res.data;
@@ -79,8 +79,7 @@ export default function VendorDeskPage() {
 
   // VERIFY OTP
   const verifyOtp = async (
-    bookingId: number,
-    realOtp: string
+    bookingId: number
   ) => {
 
     const enteredOtp =
@@ -89,30 +88,34 @@ export default function VendorDeskPage() {
     if (!enteredOtp) {
 
       alert("Enter OTP");
-      return;
-    }
 
-    if (enteredOtp !== realOtp) {
-
-      alert("Wrong OTP");
       return;
     }
 
     try {
 
       await axios.put(
-        `http://localhost:8080/vendor/complete/${bookingId}`
+        `http://localhost:8080/auth/vendor/complete/${bookingId}?otp=${enteredOtp}`
       );
 
       alert("Work Completed!");
 
       fetchVendorWorks();
 
-    } catch (err) {
+      // CLEAR OTP INPUT
+      setOtpValues((prev: any) => ({
+        ...prev,
+        [bookingId]: ""
+      }));
+
+    } catch (err: any) {
 
       console.log(err);
 
-      alert("Completion failed");
+      alert(
+        err?.response?.data ||
+        "Invalid OTP"
+      );
     }
   };
 
@@ -235,6 +238,10 @@ export default function VendorDeskPage() {
                         ₹{work.amount}
                       </p>
 
+                      <p className="text-sm text-yellow-600 mt-2">
+                        Ask customer for OTP
+                      </p>
+
                     </div>
 
                     {/* RIGHT */}
@@ -242,7 +249,7 @@ export default function VendorDeskPage() {
 
                       <input
                         type="text"
-                        placeholder="Enter OTP"
+                        placeholder="Enter Customer OTP"
                         value={
                           otpValues[work.id] || ""
                         }
@@ -258,14 +265,11 @@ export default function VendorDeskPage() {
 
                       <button
                         onClick={() =>
-                          verifyOtp(
-                            work.id,
-                            work.otp
-                          )
+                          verifyOtp(work.id)
                         }
                         className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-2xl transition"
                       >
-                        Verify
+                        Verify OTP
                       </button>
 
                     </div>

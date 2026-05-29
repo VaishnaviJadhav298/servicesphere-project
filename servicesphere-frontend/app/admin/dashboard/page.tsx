@@ -108,6 +108,16 @@ export default function AdminDashboard() {
               Bookings
 
             </button>
+            {/* COMPLAINTS */}
+             <button
+             onClick={() => router.push("/admin/complaints")}
+             className="flex items-center gap-4 text-lg font-medium hover:text-blue-400 transition"
+            >
+
+              <ShieldCheck size={22} />
+              Complaints
+
+            </button>
 
             {/* OTP */}
             <button
